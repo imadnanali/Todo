@@ -12,3 +12,4 @@ app.use("/auth", userRouter);
 app.use("/", todoRouter)
 
 app.listen(process.env.PORT, () => console.log(`App is running at port ${process.env.PORT}`));
+

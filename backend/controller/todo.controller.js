@@ -1,15 +1,21 @@
 import Todo from "../model/todo.model.js";
 
-// export const getAllTodo = (req, res)=> {
-//     const userId = req.user._id
-//     const todos = Todo.findById
-// }
+export const getAllTodo = async (req, res) => {
+    try {
+        const user = req.user._id
+        const todos = await Todo.find({ user })
+        res.status(200).json(todos)
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
 
 
 export const createTodo = (req, res) => {
     try {
         const { todo } = req.body;
         const userId = req.user._id
+
         if (!todo || !userId) {
             return res.status(400).json({ message: "Invalid" })
         }
@@ -27,13 +33,37 @@ export const createTodo = (req, res) => {
 
 }
 
+export const isTodoDone = async (req, res) => {
+    const { id } = req.params
 
-export const editTodo = (req, res)=> {
-    const { id } = req.params;
-    const { newTodo } = req.body;
-    if(!id || !todo){
-        return res.status(400).json({message: "Couldn't get todo"})
+    if (!id) {
+        return res.status(400).json({ message: "Todo not found" })
     }
 
-    const ediTodo = Todo.findByIdAndUpdate(id, {newTodo}, )
+    const todo = await Todo.findById(id);
+
+    if (!todo) {
+        return res.status(404).json({ message: "Todo not found" });
+    }
+
+    const doneTodo = await Todo.findByIdAndUpdate(id, { isDone: !todo.isDone }, { new: true })
+
+    res.status(200).json({ message: "Todo is done", doneTodo })
+
+}
+
+
+export const deleteTodo = async (req, res) => {
+    const { id } = req.params;
+    if (!id) {
+        return res.status(400).json({ message: "Couldn't get todo" })
+    }
+
+    const deletedTodo = await Todo.findByIdAndUpdate(id)
+
+    if (!deletedTodo) {
+        return res.status(400).json({ message: "Todo" })
+    }
+
+    res.status(200).json({ message: "Todo deleted", deletedTodo })
 }
